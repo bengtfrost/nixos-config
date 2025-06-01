@@ -537,4 +537,3 @@ You've successfully configured a NixOS system fully managed by Flakes, with your
 *   **Isolated Custom Builds:** `nix-shell` for complex tasks like compiling Zig.
 
 This foundation empowers you to refine your NixOS system with confidence. Happy Nixin'!
-```
