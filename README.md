@@ -12,7 +12,6 @@ This configuration is based on **NixOS 25.05 "Warbler" (Stable)**.
 
 ---
 
-```markdown
 ## 📜 Table of Contents
 
 1.  [Part 1: Transitioning to a Full Flake-Managed NixOS System with Home Manager](#part-1-transitioning-to-a-full-flake-managed-nixos-system-with-home-manager)
@@ -37,7 +36,7 @@ This configuration is based on **NixOS 25.05 "Warbler" (Stable)**.
     *   [4.3 Major Upgrades (to a new NixOS release)](#43-major-upgrades-to-a-new-nixos-release)
     *   [4.4 Managing Other Flake Inputs](#44-managing-other-flake-inputs)
 5.  [Conclusion](#conclusion)
-```
+
 ---
 
 ## Part 1: Transitioning to a Full Flake-Managed NixOS System with Home Manager
@@ -49,7 +48,7 @@ This section guides you through converting a traditional NixOS setup (or startin
 *   **NixOS Installed:** You should have a working NixOS installation (this guide uses 25.05 "Warbler").
 *   **Flakes Enabled:** Ensure Flakes are enabled in your Nix configuration. If you're starting from a non-Flake system, you might have this in `/etc/nixos/configuration.nix`:
     ```nix
-    # /etc/nixos/configuration.nix (initial state)
+    
     { config, pkgs, ... }: {
       nix.settings.experimental-features = [ "nix-command" "flakes" ];
     }
@@ -73,7 +72,7 @@ The `flake.nix` file is the heart of your Flake-managed system. It defines exter
 Place the following content in `~/Utveckling/nixos-config/flake.nix` (adjust path if your repo is elsewhere):
 
 ```nix
-# ~/Utveckling/nixos-config/flake.nix
+
 {
   description = "My Declarative NixOS System with Flakes and Home Manager";
 
@@ -119,7 +118,7 @@ Place the following content in `~/Utveckling/nixos-config/flake.nix` (adjust pat
 Your existing `/etc/nixos/configuration.nix` (which you should copy to `~/Utveckling/nixos-config/configuration.nix`) needs minor adjustments to work as a module within the Flake.
 
 ```nix
-# ~/Utveckling/nixos-config/configuration.nix
+
 { config, pkgs, lib, inputs, ... }: # Note `inputs` for Flake context
 
 {
@@ -183,7 +182,7 @@ Your existing `/etc/nixos/configuration.nix` (which you should copy to `~/Utveck
 Create `~/Utveckling/nixos-config/users/blfnix.nix` (adjust username `blfnix` as needed). This file defines user `blfnix`'s specific environment.
 
 ```nix
-# ~/Utveckling/nixos-config/users/blfnix.nix
+
 { pkgs, config, lib, inputs, ... }: # Note `inputs` for Flake context
 
 {
@@ -294,7 +293,6 @@ With `flake.nix`, `configuration.nix`, and your user's `home.nix` in place withi
 ## Part 2: Customizing and Managing Your User Environment with Home Manager
 *(This section will contain the content from my previous "Part 2" draft, showing how to add packages, configure Zsh further, manage application settings like Helix with `xdg.configFile`, and manage other dotfiles. This is where you explain how to *use* the `home.nix` file day-to-day.)*
 
-```markdown
 This section details how to use and extend your Home Manager configuration (`~/Utveckling/nixos-config/users/blfnix.nix`) for ongoing management of your user environment. Remember to run `sudo nixos-rebuild switch --flake ~/Utveckling/nixos-config#nixos` (from your Flake root) after making changes.
 
 ### 2.1 Adding and Removing User Packages (`home.packages`)
@@ -302,7 +300,7 @@ The `home.packages` list is your personal software inventory.
 
 *   **To add a package:** Find it on [search.nixos.org](https://search.nixos.org) and add `pkgs.<packagename>` to the list.
     ```nix
-    # ~/Utveckling/nixos-config/users/blfnix.nix
+
     home.packages = with pkgs; [
       # ... existing packages ...
       neofetch # System information tool
@@ -375,9 +373,8 @@ Home Manager modules allow declarative app configuration.
 ---
 
 ## Part 3: Building a Custom Zig Development Version ⚡
-*(This section will contain the content from my previous "Part 3" draft, including your actual `build-zig-dev.sh` script and the `nix-shell` command. Ensure the script paths and tarball names are correct for the version you built: `0.15.0-dev.669+561ab59ce`.)*
 
-```markdown
+
 This section details compiling Zig `0.15.0-dev.669+561ab59ce` from source.
 
 ### 3.1 Prerequisites
@@ -471,7 +468,6 @@ nix-shell -p pkgs.stdenv pkgs.bash \
 
 ## Part 4: System and Package Updates with Flakes 🔄
 
-```markdown
 With Flakes, updates are explicit and controlled.
 
 ### 4.1 Understanding `flake.lock`
@@ -523,7 +519,6 @@ If you add more Flake inputs, update them with `sudo nix flake update <input-nam
 
 ## Conclusion 🎉
 
-```markdown
 You've successfully configured a NixOS system fully managed by Flakes, with your user environment declaratively controlled by Home Manager. This setup offers exceptional reproducibility and control.
 
 **Key Takeaways:**
