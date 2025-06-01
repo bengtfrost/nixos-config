@@ -1,4 +1,3 @@
-```markdown
 # ❄️ Declarative NixOS with Flakes & Home Manager: A Zig Developer's Setup 🚀
 
 Welcome! This guide details how to set up a fully declarative, reproducible NixOS system using the power of Nix Flakes, manage your user environment with Home Manager, and compile a custom development version of the Zig programming language ⚡.
@@ -13,6 +12,7 @@ This configuration is based on **NixOS 25.05 "Warbler" (Stable)**.
 
 ---
 
+```markdown
 ## 📜 Table of Contents
 
 1.  [Part 1: Transitioning to a Full Flake-Managed NixOS System with Home Manager](#part-1-transitioning-to-a-full-flake-managed-nixos-system-with-home-manager)
@@ -37,7 +37,7 @@ This configuration is based on **NixOS 25.05 "Warbler" (Stable)**.
     *   [4.3 Major Upgrades (to a new NixOS release)](#43-major-upgrades-to-a-new-nixos-release)
     *   [4.4 Managing Other Flake Inputs](#44-managing-other-flake-inputs)
 5.  [Conclusion](#conclusion)
-
+```
 ---
 
 ## Part 1: Transitioning to a Full Flake-Managed NixOS System with Home Manager
