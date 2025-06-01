@@ -1,3 +1,4 @@
+```markdown
 # ❄️ Declarative NixOS with Flakes & Home Manager: A Zig Developer's Setup 🚀
 
 Welcome! This guide details how to set up a fully declarative, reproducible NixOS system using the power of Nix Flakes, manage your user environment with Home Manager, and compile a custom development version of the Zig programming language ⚡.
@@ -23,19 +24,19 @@ This configuration is based on **NixOS 25.05 "Warbler" (Stable)**.
 2.  [Part 2: Customizing and Managing Your User Environment with Home Manager](#part-2-customizing-and-managing-your-user-environment-with-home-manager)
     *   [2.1 Adding and Removing User Packages (`home.packages`)](#21-adding-and-removing-user-packages-homepackages)
     *   [2.2 Advanced Shell Configuration (Zsh Example)](#22-advanced-shell-configuration-zsh-example)
-    *   [2.3 Managing Application Settings (`programs.<appName>`)](#23-managing-application-settings-programsappname)
+    *   [2.3 Managing Application Settings (`programs.appname`)](#23-managing-application-settings-programsappname)
     *   [2.4 Managing Dotfiles (`home.file` or `xdg.configFile`)](#24-managing-dotfiles-homefile-or-xdgconfigfile)
-3.  [Part 3: Building a Custom Zig Development Version](#part-3-building-a-custom-zig-development-version)
-    *   [3.1 Prerequisites](#31-prerequisites)
+3.  [Part 3: Building a Custom Zig Development Version ⚡](#part-3-building-a-custom-zig-development-version-)
+    *   [3.1 Prerequisites](#31-prerequisites-1)
     *   [3.2 The Build Script (`build-zig-dev.sh`)](#32-the-build-script-build-zig-devsh)
     *   [3.3 Running the Build Script with `nix-shell`](#33-running-the-build-script-with-nix-shell)
     *   [3.4 Post-Build: Using Your Custom Zig](#34-post-build-using-your-custom-zig)
-4.  [Part 4: System and Package Updates with Flakes](#part-4-system-and-package-updates-with-flakes)
+4.  [Part 4: System and Package Updates with Flakes 🔄](#part-4-system-and-package-updates-with-flakes-)
     *   [4.1 Understanding `flake.lock` and Flake Inputs](#41-understanding-flakelock-and-flake-inputs)
     *   [4.2 Minor Updates (within the same NixOS release)](#42-minor-updates-within-the-same-nixos-release)
     *   [4.3 Major Upgrades (to a new NixOS release)](#43-major-upgrades-to-a-new-nixos-release)
     *   [4.4 Managing Other Flake Inputs](#44-managing-other-flake-inputs)
-5.  [Conclusion](#conclusion)
+5.  [Conclusion 🎉](#conclusion-)
 
 ---
 
@@ -48,7 +49,7 @@ This section guides you through converting a traditional NixOS setup (or startin
 *   **NixOS Installed:** You should have a working NixOS installation (this guide uses 25.05 "Warbler").
 *   **Flakes Enabled:** Ensure Flakes are enabled in your Nix configuration. If you're starting from a non-Flake system, you might have this in `/etc/nixos/configuration.nix`:
     ```nix
-    
+    # /etc/nixos/configuration.nix (initial state)
     { config, pkgs, ... }: {
       nix.settings.experimental-features = [ "nix-command" "flakes" ];
     }
@@ -72,7 +73,7 @@ The `flake.nix` file is the heart of your Flake-managed system. It defines exter
 Place the following content in `~/Utveckling/nixos-config/flake.nix` (adjust path if your repo is elsewhere):
 
 ```nix
-
+# ~/Utveckling/nixos-config/flake.nix
 {
   description = "My Declarative NixOS System with Flakes and Home Manager";
 
@@ -118,7 +119,7 @@ Place the following content in `~/Utveckling/nixos-config/flake.nix` (adjust pat
 Your existing `/etc/nixos/configuration.nix` (which you should copy to `~/Utveckling/nixos-config/configuration.nix`) needs minor adjustments to work as a module within the Flake.
 
 ```nix
-
+# ~/Utveckling/nixos-config/configuration.nix
 { config, pkgs, lib, inputs, ... }: # Note `inputs` for Flake context
 
 {
@@ -182,7 +183,7 @@ Your existing `/etc/nixos/configuration.nix` (which you should copy to `~/Utveck
 Create `~/Utveckling/nixos-config/users/blfnix.nix` (adjust username `blfnix` as needed). This file defines user `blfnix`'s specific environment.
 
 ```nix
-
+# ~/Utveckling/nixos-config/users/blfnix.nix
 { pkgs, config, lib, inputs, ... }: # Note `inputs` for Flake context
 
 {
@@ -233,9 +234,9 @@ Create `~/Utveckling/nixos-config/users/blfnix.nix` (adjust username `blfnix` as
       autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
       zle -N up-line-or-beginning-search; zle -N down-line-or-beginning-search
       bindkey "^[[A" up-line-or-beginning-search; bindkey "^[[B" down-line-or-beginning-search
-      # Custom Functions (place your 'multipull' and '_activate_venv' here)
-      multipull() { echo "Implement multipull here..."; }
-      _activate_venv() { echo "Implement _activate_venv here..."; }
+      # Custom Functions (ensure these are defined or remove if not used)
+      multipull() { echo "NOTE: Implement your 'multipull' function here or remove this line."; }
+      _activate_venv() { echo "NOTE: Implement your '_activate_venv' function here or remove this line."; }
     '';
   };
 
@@ -258,7 +259,7 @@ Create `~/Utveckling/nixos-config/users/blfnix.nix` (adjust username `blfnix` as
 *   Configure Zsh, Git, Helix, Starship, etc., using their Home Manager modules.
 *   Use `initContent` for Zsh `PATH` exports, functions, and specific `setopt`/`bindkey` commands.
 *   Don't forget to set your correct Git `userName` and `userEmail`.
-*   Make sure to include your actual `multipull` and `_activate_venv` function definitions in `initContent`.
+*   Ensure your actual `multipull` and `_activate_venv` functions are defined in `initContent`.
 
 ### 1.5 The First System Build with Flakes & Home Manager
 
@@ -270,18 +271,18 @@ With `flake.nix`, `configuration.nix`, and your user's `home.nix` in place withi
     ```
 2.  **Build and switch to the new configuration:**
     ```bash
-    sudo nixos-rebuild switch --flake .#nixos 
+    sudo nixos-rebuild switch --flake .#nixos
     # Replace 'nixos' with your system's actual name in flake.nix outputs
     ```
-    This command might take some time on the first run as it builds everything.
-3.  **Troubleshooting (Recap of your journey):**
-    *   **Purity Errors:** Caused by `import /home/...` in `flake.nix`. Solved by moving the `home.nix` import to use a relative path within the Flake (e.g., `import ./users/blfnix.nix;`).
-    *   **Home Manager Activation Conflicts:** Caused by existing dotfiles. Solved by adding `home-manager.backupFileExtension = "hm-bak";` in `flake.nix`.
-    *   **Incorrect Module Options:** E.g., for Zsh plugins (`enableAutosuggestions` -> `autosuggestion.enable`), Vi mode (`viMode` -> `keyMap` or `bindkey -v`). Check Home Manager documentation for current option names.
-    *   **Package Collisions:** E.g., `gitFull` vs `git`, or multiple LLVM components providing `objdump`. Solved by selecting a single, non-conflicting package (e.g., using `pkgs.git`, removing `llvmPackages_XX.bintools` if `clang` provides equivalents).
-    *   **`stateVersion`:** Ensure `system.stateVersion` in `configuration.nix` and `home.stateVersion` in `home.nix` match your target NixOS release (e.g., `"25.05"`).
+    This command might take some time on the first run.
+3.  **Troubleshooting (Recap):**
+    *   **Purity Errors:** Ensure `home.nix` is imported with a relative path (e.g., `import ./users/blfnix.nix;`) from `flake.nix`.
+    *   **Home Manager Activation Conflicts:** `home-manager.backupFileExtension = "hm-bak";` in `flake.nix` handles this.
+    *   **Incorrect Module Options:** Refer to Home Manager documentation for current option names (e.g., Zsh `autosuggestion.enable`, `keyMap = "vi"` or `bindkey -v`).
+    *   **Package Collisions:** Ensure only one package provides a given binary (e.g., use `pkgs.git` not `gitFull` if conflicts arise; remove `llvmPackages_XX.bintools` if `clang` handles `objdump`).
+    *   **`stateVersion`:** Match `system.stateVersion` and `home.stateVersion` to your NixOS release (e.g., `"25.05"`).
 4.  **Post-Build Steps:**
-    *   **Log out and log back in** as your user (`blfnix`) for all Home Manager settings (PATH, shell config) to take effect.
+    *   **Log out and log back in** as your user (`blfnix`) for all Home Manager settings to take effect.
     *   **Initialize `rustup` (as user `blfnix`):**
         ```bash
         rustup default stable
@@ -291,7 +292,6 @@ With `flake.nix`, `configuration.nix`, and your user's `home.nix` in place withi
 ---
 
 ## Part 2: Customizing and Managing Your User Environment with Home Manager
-*(This section will contain the content from my previous "Part 2" draft, showing how to add packages, configure Zsh further, manage application settings like Helix with `xdg.configFile`, and manage other dotfiles. This is where you explain how to *use* the `home.nix` file day-to-day.)*
 
 This section details how to use and extend your Home Manager configuration (`~/Utveckling/nixos-config/users/blfnix.nix`) for ongoing management of your user environment. Remember to run `sudo nixos-rebuild switch --flake ~/Utveckling/nixos-config#nixos` (from your Flake root) after making changes.
 
@@ -300,7 +300,7 @@ The `home.packages` list is your personal software inventory.
 
 *   **To add a package:** Find it on [search.nixos.org](https://search.nixos.org) and add `pkgs.<packagename>` to the list.
     ```nix
-
+    # ~/Utveckling/nixos-config/users/blfnix.nix
     home.packages = with pkgs; [
       # ... existing packages ...
       neofetch # System information tool
@@ -309,8 +309,8 @@ The `home.packages` list is your personal software inventory.
     ```
 *   **To remove:** Delete the line from the list.
 
-### 2.2 Advanced Shell Configuration (Zsh)
-All Zsh settings are within `programs.zsh = { ... };`.
+### 2.2 Advanced Shell Configuration (Zsh Example)
+All Zsh settings for `blfnix` are within `programs.zsh = { ... };`.
 
 *   **Aliases (`shellAliases`):**
     ```nix
@@ -328,11 +328,11 @@ All Zsh settings are within `programs.zsh = { ... };`.
     programs.zsh.initContent = ''
       # ... existing content ...
       setopt extended_glob
-      # Your multipull and _activate_venv functions go here
+      # Your multipull and _activate_venv functions go here (ensure they are fully defined)
     '';
     ```
 
-### 2.3 Managing Application Settings (`programs.<appName>`)
+### 2.3 Managing Application Settings (`programs.appname`)
 Home Manager modules allow declarative app configuration.
 
 *   **Starship (`programs.starship`):**
@@ -354,26 +354,24 @@ Home Manager modules allow declarative app configuration.
     #    ~/Utveckling/nixos-config/dotfiles/helix/config.toml
     #    ~/Utveckling/nixos-config/dotfiles/helix/languages.toml
     # 2. Add to your blfnix.nix:
-    xdg.configFile."helix/config.toml".source = ../dotfiles/helix/config.toml;
-    xdg.configFile."helix/languages.toml".source = ../dotfiles/helix/languages.toml;
+    # xdg.configFile."helix/config.toml".source = ../dotfiles/helix/config.toml;
+    # xdg.configFile."helix/languages.toml".source = ../dotfiles/helix/languages.toml;
     ```
     *(Note: The `../dotfiles/` path assumes `blfnix.nix` is in `users/` and `dotfiles/` is at the Flake root `~/Utveckling/nixos-config/dotfiles/`)*
 
-### 2.4 Managing Other Dotfiles
+### 2.4 Managing Dotfiles (`home.file` or `xdg.configFile`)
 *   **`home.file.".filename"`:** For files directly in `~`.
     ```nix
-    home.file.".my_cool_script.sh" = {
-      source = ../dotfiles/my_cool_script.sh; # Assumes script is in dotfiles/
-      executable = true;
-    };
+    # home.file.".my_cool_script.sh" = {
+    #   source = ../dotfiles/my_cool_script.sh; # Assumes script is in dotfiles/
+    #   executable = true;
+    # };
     ```
 *   **`xdg.configFile."app/config"`:** For files in `~/.config/`. (Used for Helix above).
-```
 
 ---
 
 ## Part 3: Building a Custom Zig Development Version ⚡
-
 
 This section details compiling Zig `0.15.0-dev.669+561ab59ce` from source.
 
@@ -392,7 +390,7 @@ ZIG_VERSION_TO_BUILD="0.15.0-dev.669+561ab59ce"
 DOWNLOAD_DIR="${PWD}" # Assumes tarballs are in CWD
 
 STAGE1_TARBALL_NAME="zig-x86_64-linux-${ZIG_VERSION_TO_BUILD}.tar.xz"
-SOURCE_TARBALL_NAME="zig-${ZIG_VERSION_TO_BUILD}.tar.xz" # Verify if -src- is needed from ziglang.org
+SOURCE_TARBALL_NAME="zig-${ZIG_VERSION_TO_BUILD}.tar.xz" # From your ls output; verify if Zig changes to -src-
 
 BASE_DEV_DIR="${HOME}/Utveckling/Zig"
 STAGE1_EXTRACTION_DIR="${BASE_DEV_DIR}/zig_compilers/zig-${ZIG_VERSION_TO_BUILD}"
@@ -407,38 +405,50 @@ REBUILD_ARTIFACTS=false; CHECK_AFTER_BUILD=false; OPTIMIZE_LEVEL="ReleaseFast"; 
 while [[ $# -gt 0 ]]; do case "$1" in --check) CHECK_AFTER_BUILD=true;; --rebuild-artifacts) REBUILD_ARTIFACTS=true;; --optimize=*) OPTIMIZE_LEVEL="${1#*=}";; -D*) ADDITIONAL_ZIG_BUILD_OPTIONS+=("$1");; *) echo "❌ Unk opt: $1";exit 1;; esac; shift; done
 
 # --- Prep ---
-echo "➡️ Prep Zig: ${ZIG_VERSION_TO_BUILD}"; # (shortened echo for brevity in README)
-# ... (Include essential echo statements about paths if desired) ...
-if [ ! -f "${DOWNLOAD_DIR}/${STAGE1_TARBALL_NAME}" ]; then echo "❌ Stage1 not found"; exit 1; fi
-if [ ! -f "${DOWNLOAD_DIR}/${SOURCE_TARBALL_NAME}" ]; then echo "❌ Source not found"; exit 1; fi
-if [ "$REBUILD_ARTIFACTS" = true ]; then rm -rf "$STAGE1_EXTRACTION_DIR" "$SOURCE_EXTRACTION_DIR" "$FINAL_INSTALL_PREFIX"; fi
+echo "➡️ Preparing Zig build for version: ${ZIG_VERSION_TO_BUILD}"
+echo "   Stage1 Tarball:      ${DOWNLOAD_DIR}/${STAGE1_TARBALL_NAME}"
+echo "   Source Tarball:      ${DOWNLOAD_DIR}/${SOURCE_TARBALL_NAME}"
+# ... (other echos for paths are good for script verbosity) ...
+if [ ! -f "${DOWNLOAD_DIR}/${STAGE1_TARBALL_NAME}" ]; then echo "❌ Stage1 tarball not found: ${DOWNLOAD_DIR}/${STAGE1_TARBALL_NAME}"; exit 1; fi
+if [ ! -f "${DOWNLOAD_DIR}/${SOURCE_TARBALL_NAME}" ]; then echo "❌ Source tarball not found: ${DOWNLOAD_DIR}/${SOURCE_TARBALL_NAME}"; exit 1; fi
+if [ "$REBUILD_ARTIFACTS" = true ]; then echo "🗑️ Cleaning previous build artifacts..."; rm -rf "$STAGE1_EXTRACTION_DIR" "$SOURCE_EXTRACTION_DIR" "$FINAL_INSTALL_PREFIX"; fi
 mkdir -p "$STAGE1_EXTRACTION_DIR" "$SOURCE_EXTRACTION_DIR" "$FINAL_INSTALL_PREFIX" "$(dirname "$FINAL_SYMLINK_PATH")"
 
 # --- Extract Stage1 ---
 if [ ! -f "$STAGE1_ZIG_COMPILER_PATH" ] || [ "$REBUILD_ARTIFACTS" = true ]; then
-  echo "📦 Extract Stage1..."; tar -xf "${DOWNLOAD_DIR}/${STAGE1_TARBALL_NAME}" -C "$STAGE1_EXTRACTION_DIR" --strip-components=1 || exit 1; echo "✅ Stage1 done."; fi
-if [ ! -x "$STAGE1_ZIG_COMPILER_PATH" ]; then echo "❌ Stage1 zig not exec"; exit 1; fi
-echo "ℹ️ Stage1: $($STAGE1_ZIG_COMPILER_PATH version) at $STAGE1_ZIG_COMPILER_PATH"
+  echo "📦 Extracting Stage1 compiler..."; tar -xf "${DOWNLOAD_DIR}/${STAGE1_TARBALL_NAME}" -C "$STAGE1_EXTRACTION_DIR" --strip-components=1 || { echo "❌ Failed Stage1 extraction"; exit 1; }
+  echo "✅ Stage1 extracted."
+fi
+if [ ! -x "$STAGE1_ZIG_COMPILER_PATH" ]; then echo "❌ Stage1 zig not found or not executable: $STAGE1_ZIG_COMPILER_PATH"; exit 1; fi
+echo "ℹ️ Using Stage1 Zig ($($STAGE1_ZIG_COMPILER_PATH version)) from: $STAGE1_ZIG_COMPILER_PATH"
 
 # --- Extract Source ---
 if [ ! -f "${SOURCE_EXTRACTION_DIR}/build.zig" ] || [ "$REBUILD_ARTIFACTS" = true ]; then
-  echo "📦 Extract Source..."; if [ "$REBUILD_ARTIFACTS" = true ]; then rm -rf "${SOURCE_EXTRACTION_DIR:?}"/*; fi; tar -xf "${DOWNLOAD_DIR}/${SOURCE_TARBALL_NAME}" -C "$SOURCE_EXTRACTION_DIR" --strip-components=1 || exit 1; echo "✅ Source done."; fi
-if [ ! -f "${SOURCE_EXTRACTION_DIR}/build.zig" ]; then echo "❌ build.zig not found"; exit 1; fi
+  echo "📦 Extracting Zig source code..."; if [ "$REBUILD_ARTIFACTS" = true ] && [ -d "$SOURCE_EXTRACTION_DIR" ]; then rm -rf "${SOURCE_EXTRACTION_DIR:?}"/*; fi
+  tar -xf "${DOWNLOAD_DIR}/${SOURCE_TARBALL_NAME}" -C "$SOURCE_EXTRACTION_DIR" --strip-components=1 || { echo "❌ Failed Source extraction"; exit 1; }
+  echo "✅ Zig source extracted."
+fi
+if [ ! -f "${SOURCE_EXTRACTION_DIR}/build.zig" ]; then echo "❌ Target source 'build.zig' not found in: ${SOURCE_EXTRACTION_DIR}"; exit 1; fi
 
-# --- Build ---
+# --- Build Process ---
 cd "$SOURCE_EXTRACTION_DIR"
-if [ "$REBUILD_ARTIFACTS" = true ]; then echo "🗑️ Clean cache..."; rm -rf ./zig-cache ./zig-out; fi
-echo "🏗 Building Zig ${ZIG_VERSION_TO_BUILD}..."; if [ "$REBUILD_ARTIFACTS" != true ]; then echo "🧼 Clean install dest..."; rm -rf "${FINAL_INSTALL_PREFIX:?}"/*; fi
+if [ "$REBUILD_ARTIFACTS" = true ]; then echo "🗑️ Cleaning local build cache (zig-cache, zig-out)..."; rm -rf ./zig-cache ./zig-out; fi
+echo "🏗 Building Zig ${ZIG_VERSION_TO_BUILD}...";
+if [ "$REBUILD_ARTIFACTS" != true ]; then echo "🧼 Cleaning previous build from install destination: ${FINAL_INSTALL_PREFIX}"; rm -rf "${FINAL_INSTALL_PREFIX:?}"/*; fi
 BUILD_ARGS=(build install -p "$FINAL_INSTALL_PREFIX" "-Doptimize=${OPTIMIZE_LEVEL}" "-Dtarget=native" -Dstrip "${ADDITIONAL_ZIG_BUILD_OPTIONS[@]}")
-echo "🚀 Exec: $STAGE1_ZIG_COMPILER_PATH ${BUILD_ARGS[*]}"; "$STAGE1_ZIG_COMPILER_PATH" "${BUILD_ARGS[@]}" || exit 1
+echo "🚀 Executing: $STAGE1_ZIG_COMPILER_PATH ${BUILD_ARGS[*]}"
+"$STAGE1_ZIG_COMPILER_PATH" "${BUILD_ARGS[@]}" || { echo "❌ Zig build failed!"; exit 1; }
 
 # --- Post-Build ---
 REBUILT_ZIG_BIN="${FINAL_INSTALL_PREFIX}/bin/zig"
-if [ ! -x "$REBUILT_ZIG_BIN" ]; then echo "❌ Zig bin not found post-build"; exit 1; fi
-if [ "$CHECK_AFTER_BUILD" = true ]; then echo "🔍 Check version:"; "$REBUILT_ZIG_BIN" version; fi
-echo "🔗 Symlink: $FINAL_SYMLINK_PATH -> ${REBUILT_ZIG_BIN}"; ln -sf "$REBUILT_ZIG_BIN" "$FINAL_SYMLINK_PATH"
-echo "✅ Zig ${ZIG_VERSION_TO_BUILD} built!"; echo "   Version: $($REBUILT_ZIG_BIN version)"; echo "   Installed: $FINAL_INSTALL_PREFIX"; echo "   Symlink: $FINAL_SYMLINK_PATH"
-echo "🔔 To make default 'zig': ln -sf \"$REBUILT_ZIG_BIN\" \"${HOME}/.local/bin/zig\""
+if [ ! -x "$REBUILT_ZIG_BIN" ]; then echo "❌ Zig binary not found after build at: $REBUILT_ZIG_BIN"; exit 1; fi
+if [ "$CHECK_AFTER_BUILD" = true ]; then echo "🔍 Checking newly built Zig version:"; "$REBUILT_ZIG_BIN" version; fi
+echo "🔗 Creating symlink: $FINAL_SYMLINK_PATH -> ${REBUILT_ZIG_BIN}"; ln -sf "$REBUILT_ZIG_BIN" "$FINAL_SYMLINK_PATH"
+echo "✅ Zig ${ZIG_VERSION_TO_BUILD} successfully built and installed."
+echo "   Version reported by new binary: $($REBUILT_ZIG_BIN version)"
+echo "   Installed to: $FINAL_INSTALL_PREFIX"
+echo "   Symlink available at: $FINAL_SYMLINK_PATH"
+echo "🔔 To make this your default 'zig' command, run: ln -sf \"$REBUILT_ZIG_BIN\" \"${HOME}/.local/bin/zig\""
 ```
 
 ### 3.3 Running the Build Script with `nix-shell`
@@ -460,9 +470,8 @@ nix-shell -p pkgs.stdenv pkgs.bash \
 *   Symlink: `~/.local/bin/zig-0.15.0-dev.669+561ab59ce`
 *   Since `~/.local/bin` is in your `PATH` (from `programs.zsh.initContent`), run with:
     `zig-0.15.0-dev.669+561ab59ce version`
-*   The `zig` command will still point to your system's stable Zig (0.14). To make the dev version default, run:
+*   The `zig` command will still point to your system's stable Zig. To make the dev version default, run:
     `ln -sf ~/.local/zig-0.15.0-dev.669+561ab59ce/bin/zig ~/.local/bin/zig`
-```
 
 ---
 
@@ -488,6 +497,7 @@ Your `flake.lock` file (e.g., in `~/Utveckling/nixos-config/flake.lock`) pins th
 1.  **Read Release Notes!** Crucial for breaking changes.
 2.  **Edit `flake.nix`:** Update `inputs` URLs:
     ```nix
+    # Example for a hypothetical NixOS 25.11
     inputs = {
       nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11"; # Target new release
       home-manager.url = "github:nix-community/home-manager/release-25.11";
@@ -503,8 +513,8 @@ Your `flake.lock` file (e.g., in `~/Utveckling/nixos-config/flake.lock`) pins th
     sudo nixos-rebuild switch --flake .#nixos
     ```
 5.  **Update `stateVersion`:**
-    *   In `configuration.nix`: `system.stateVersion = "25.11";`
-    *   In `users/blfnix.nix`: `home.stateVersion = "25.11";`
+    *   In `configuration.nix`: `system.stateVersion = "25.11";` (use the new version string)
+    *   In `users/blfnix.nix`: `home.stateVersion = "25.11";` (use the new version string)
 6.  **Second Rebuild:** Applies state version changes.
     ```bash
     sudo nixos-rebuild switch --flake .#nixos
@@ -513,7 +523,6 @@ Your `flake.lock` file (e.g., in `~/Utveckling/nixos-config/flake.lock`) pins th
 
 ### 4.4 Managing Other Flake Inputs
 If you add more Flake inputs, update them with `sudo nix flake update <input-name>` or all with `sudo nix flake update`.
-```
 
 ---
 
@@ -530,6 +539,4 @@ You've successfully configured a NixOS system fully managed by Flakes, with your
 
 This foundation empowers you to refine your NixOS system with confidence. Happy Nixin'!
 ```
-
----
 
