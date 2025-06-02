@@ -1,4 +1,3 @@
-
 # /etc/nixos/users/blfnix.nix
 { pkgs, config, lib, inputs, ... }:
 
@@ -11,12 +10,13 @@
   # All your user-specific packages are managed here.
   home.packages = with pkgs; [
     # Dev Toolchains
-    rustup
-    python313
-    uv
-    nodejs_24
-    zig
-    zls
+    rustup # For rustc, cargo, rust-analyzer, rustfmt (via rustup component add)
+    python313 # For Python development
+    uv        # For project-local Python venvs (use with Nix-provided Python)
+    nodejs_24 # Provides node, npm (for LSPs below if they are node-based)
+    zig       # System's stable Zig (e.g., 0.14)
+    zls       # Language server for system's stable Zig
+    zsh-autocomplete # For Zsh autocompletion
 
     # BUILD TOOLS for custom Zig dev build (and general use)
     cmake
@@ -26,53 +26,60 @@
     llvmPackages_20.clang       # Provides clang, clang++, and standard wrappers
     llvmPackages_20.llvm        # Core LLVM tools and libraries (llvm-config, etc.)
     llvmPackages_20.lld         # The LLVM linker, lld
-    # llvmPackages_20.bintools  # Intentionally removed to solve objdump collision
-    llvmPackages_20.clang-tools # Provides clangd, clang-format, clang-tidy
+    # llvmPackages_20.bintools  # Intentionally not included to avoid objdump collision if clang handles it
+    llvmPackages_20.clang-tools # Provides clangd, clang-format
 
-    # Editors & LSPs
+    # Editors
     helix
-    marksman
-    # You could add rust-analyzer, nil, clangd (from clang-tools) etc. here for Helix
+
+    # === LSPs and FORMATTERS for HELIX (from Nixpkgs) ===
+    marksman     # Markdown LSP
+
+    # Python LSPs & Formatters
+    ruff         # Provides 'ruff server' (LSP) and 'ruff format' / 'ruff check --fix'
+    python313Packages.python-lsp-server # Provides 'pylsp' command
+
+    # TypeScript/JavaScript/JSON/YAML - LSPs
+    nodePackages.typescript-language-server # Provides 'typescript-language-server'
+    nodePackages.vscode-json-languageserver # Provides 'json-language-server' (for JSON)
+    nodePackages.yaml-language-server       # Provides 'yaml-language-server'
+
+    # Formatters
+    dprint       # General purpose formatter, command 'dprint'
+    taplo        # TOML formatter and LSP provider, command 'taplo' (includes 'taplo lsp stdio')
+    # Note: clang-format is from llvmPackages_20.clang-tools
+    # Note: rustfmt is installed via `rustup component add rustfmt`
+    # Note: zig fmt is part of the `zig` executable
+
+    # === END LSPs and FORMATTERS ===
 
     # CLI Tools & Utilities
     tmux
     pass
     keychain
-    git
-    gh
-    fd           # fzf will use this via FZF_DEFAULT_COMMAND
+    git          # Standard git package
+    gh           # GitHub CLI
+    fd           # For fzf and general use
     ripgrep
     bat
     jq
-    # fzf is now managed by programs.fzf module below
+    # fzf is managed by programs.fzf module below
     xclip
     yazi
-    ueberzugpp
-    unar
-    ffmpegthumbnailer
-    poppler_utils
-    w3m
-    zathura 
-    zsh-autocomplete
+    ueberzugpp   # For yazi image previews
+    unar         # For yazi archive previews
+    ffmpegthumbnailer # For yazi video thumbnails
+    poppler_utils     # For yazi PDF previews
+    w3m          # Text-based browser
+    zathura      # Document viewer
   ];
 
   # --- ZSH CONFIGURATION ---
   programs.zsh = {
     enable = true;
-    autosuggestion.enable = true;     # For zsh-autosuggestions plugin
-    syntaxHighlighting.enable = true; # For zsh-syntax-highlighting plugin
-    # keyMap = "vi";                    # Enable Vi keybindings
-
-    # --- ZSH PLUGINS ---
-    # Home Manager will handle installing and sourcing these plugins.
-    # plugins = [
-      # {
-        # name = "zsh-autocomplete"; # Identifier for Home Manager
-        # src = pkgs.zsh-autocomplete; # The Nix package for the plugin
-      # }
-      # Add other plugins here if needed, e.g.:
-      # { name = "zsh-history-substring-search"; src = pkgs.zsh-history-substring-search; }
-    # ];
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
+    # keyMap = "vi"; # Using bindkey -v in initContent for reliability
 
     shellAliases = {
       ls = "ls --color=auto -F";
@@ -86,31 +93,33 @@
 
     history = {
       size = 10000;
-      path = "${config.xdg.dataHome}/zsh/history"; # Keeps history in ~/.local/share
-      share = true;              # Share history between all sessions
-      ignoreDups = true;         # Don't record an entry if it's the same as the previous one
-      ignoreSpace = true;        # Commands starting with a space are not saved
+      path = "${config.xdg.dataHome}/zsh/history";
+      share = true;
+      ignoreDups = true;
+      ignoreSpace = true;
       save = 10000;
     };
 
     initContent = ''
-      # Fallback for Vi Keybindings if keyMap = "vi" option doesn't work as expected
+      # Enable Vi Keybindings
       bindkey -v
 
       # --- PATH Exports ---
-      export PATH="$HOME/.cargo/bin:$PATH"
-      export PATH="$HOME/.local/bin:$PATH"
-      export PATH="$HOME/.npm-global/bin:$PATH"
+      # These ensure tools installed outside of Nix (but within user's home) are found.
+      # Nix-managed tools (from home.packages) are typically prepended to PATH by Home Manager.
+      export PATH="$HOME/.cargo/bin:$PATH"   # For rustup tools (rustc, cargo, rust-analyzer, rustfmt) & cargo install
+      export PATH="$HOME/.local/bin:$PATH" # For user scripts & custom builds (like your Zig dev)
+      export PATH="$HOME/.npm-global/bin:$PATH" # For any global npm packages not managed by Nix
 
       # KEYTIMEOUT for ZLE responsiveness, especially in Vi mode
       export KEYTIMEOUT=150
 
-      # History search keybindings (standard Zsh, compatible with plugins)
-      autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
-      zle -N up-line-or-beginning-search
-      zle -N down-line-or-beginning-search
-      bindkey "^[[A" up-line-or-beginning-search   # Arrow Up
-      bindkey "^[[B" down-line-or-beginning-search # Arrow Down
+      # History search keybindings - COMMENTED OUT to allow zsh-autocomplete to use arrow keys
+      # autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+      # zle -N up-line-or-beginning-search
+      # zle -N down-line-or-beginning-search
+      # bindkey "^[[A" up-line-or-beginning-search
+      # bindkey "^[[B" down-line-or-beginning-search
 
       # --- Custom Functions ---
       multipull() {
@@ -144,15 +153,15 @@
         . "$venv_activate_path" && echo "Activated venv: $venv_name"
       }
 
-      # Example venv functions 
-      v_mlmenv() { _activate_venv "mlmenv" "$HOME/.venv/mlmenv/bin/activate"; }
-      v_crawl4ai() { _activate_venv "crawl4ai" "$HOME/.venv/crawl4ai/bin/activate"; }
+      # Example venv functions (uncomment and adapt paths as needed)
+      v_mlmenv() { _activate_venv "mlmenv" "$HOME/.venv/python3.13/mlmenv/bin/activate"; }
+      v_crawl4ai() { _activate_venv "crawl4ai" "$HOME/.venv/python3.13/crawl4ai/bin/activate"; }
     '';
   };
 
   # --- PROGRAM CONFIGURATIONS ---
   programs.starship.enable = true;
-  programs.helix.enable = true;
+  programs.helix.enable = true; # Ensures Helix editor itself is from Nixpkgs
 
   programs.git = {
     enable = true;
@@ -167,64 +176,63 @@
   programs.fzf = {
     enable = true; # Installs fzf and enables basic shell integration
     enableZshIntegration = true; # Sets up Zsh keybindings (Ctrl-T, Ctrl-R, Alt-C)
-
-    # Sets FZF_DEFAULT_COMMAND. `fd` (from home.packages) will be used.
     defaultCommand = "fd --type f --hidden --follow --exclude .git";
-
-    # Sets FZF_DEFAULT_OPTS.
     defaultOptions = [
       "--height 40%"
       "--layout=reverse"
       "--border"
-      "--prompt='➜  '" # The prompt string for fzf
+      "--prompt='➜  '"
     ];
   };
 
   programs.zathura = {
     enable = true;
-    # Add your zathurarc settings here
     options = {
-      # These will be written to the generated zathurarc
       selection-clipboard = "clipboard";
       adjust-open = "best-fit";
-      # Add any other zathurarc settings you want
-      # For example:
-      # "font" = "Monospace 12";
-      # "default-bg" = "#282a36";
-      # "statusbar-fg" = "#f8f8f2";
-      # "statusbar-bg" = "#44475a";
-      default-bg =                 "#212121";
-      default-fg =                 "#303030";
-      statusbar-fg =               "#B2CCD6";
-      statusbar-bg =               "#353535";
-      inputbar-bg =                "#212121";
-      inputbar-fg =                "#FFFFFF";
-      notification-bg =            "#212121";
-      notification-fg =            "#FFFFFF";
-      notification-error-bg =      "#212121";
-      notification-error-fg =      "#F07178";
-      notification-warning-bg =    "#212121";
-      notification-warning-fg =    "#F07178";
-      highlight-color =            "#FFCB6B";
-      highlight-active-color =     "#82AAFF";
-      completion-bg =              "#303030";
-      completion-fg =              "#82AAFF";
-      completion-highlight-fg =    "#FFFFFF";
-      completion-highlight-bg =    "#82AAFF";
-      recolor-lightcolor =         "#212121";
-      recolor-darkcolor =          "#EEFFFF";
-      recolor =                    "false";
-      recolor-keephue =            "false";
+      default-bg = "#212121";
+      default-fg = "#303030";
+      statusbar-fg = "#B2CCD6";
+      statusbar-bg = "#353535";
+      inputbar-bg = "#212121";
+      inputbar-fg = "#FFFFFF";
+      notification-bg = "#212121";
+      notification-fg = "#FFFFFF";
+      notification-error-bg = "#212121";
+      notification-error-fg = "#F07178";
+      notification-warning-bg = "#212121";
+      notification-warning-fg = "#F07178";
+      highlight-color = "#FFCB6B";
+      highlight-active-color = "#82AAFF";
+      completion-bg = "#303030";
+      completion-fg = "#82AAFF";
+      completion-highlight-fg = "#FFFFFF";
+      completion-highlight-bg = "#82AAFF";
+      recolor-lightcolor = "#212121";
+      recolor-darkcolor = "#EEFFFF";
+      recolor = false; # Note: boolean, not string "false"
+      recolor-keephue = false; # Note: boolean
     };
-    # If you have many settings or prefer a separate file:
-    # extraConfig = ''
-    #   set selection-clipboard clipboard
-    #   set adjust-open best-fit
-    #   # More settings
-    # '';
-    # Or even source an entire file you manage within your flake:
-    # extraConfig = builtins.readFile ../dotfiles/zathurarc-custom; # Assuming path in your flake
   };
+
+  # --- MANAGING HELIX CONFIGURATION FILES (Recommended) ---
+  # Assumes you have created these files inside your flake, e.g., at
+  # /etc/nixos/dotfiles/helix/languages.toml
+  # /etc/nixos/dotfiles/helix/config.toml (if you manage it too)
+  # The path `../dotfiles/` is relative to this `blfnix.nix` file's location
+  # (e.g. if blfnix.nix is in /etc/nixos/users/ and dotfiles/ is in /etc/nixos/dotfiles/)
+  xdg.configFile."helix/languages.toml" = {
+    source = ../dotfiles/helix/languages.toml;
+    # If you don't want to manage it via a separate file and prefer inline text:
+    # text = ''
+    #   # Paste your languages.toml content here
+    # '';
+  };
+  # Example for config.toml:
+  # xdg.configFile."helix/config.toml" = {
+  #   source = ../dotfiles/helix/config.toml;
+  # };
+
 
   # --- GLOBAL ENVIRONMENT VARIABLES ---
   home.sessionVariables = {
@@ -234,8 +242,6 @@
     CC = "clang";
     CXX = "clang++";
     GIT_TERMINAL_PROMPT = "1";
-
-    # Ensures fzf's Alt-C (change directory) binding uses `fd` for directory listing.
     FZF_ALT_C_COMMAND = "fd --type d --hidden --follow --exclude .git";
   };
 }
