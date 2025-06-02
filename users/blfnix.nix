@@ -52,15 +52,27 @@
     poppler_utils
     w3m
     zathura
-    swayimg # For the 'imgdir' alias
+    zsh-autocomplete
   ];
 
   # --- ZSH CONFIGURATION ---
   programs.zsh = {
     enable = true;
-    autosuggestion.enable = true;
-    syntaxHighlighting.enable = true;
-    
+    autosuggestion.enable = true;     # For zsh-autosuggestions plugin
+    syntaxHighlighting.enable = true; # For zsh-syntax-highlighting plugin
+    # keyMap = "vi";                    # Enable Vi keybindings
+
+    # --- ZSH PLUGINS ---
+    # Home Manager will handle installing and sourcing these plugins.
+    # plugins = [
+      # {
+        # name = "zsh-autocomplete"; # Identifier for Home Manager
+        # src = pkgs.zsh-autocomplete; # The Nix package for the plugin
+      # }
+      # Add other plugins here if needed, e.g.:
+      # { name = "zsh-history-substring-search"; src = pkgs.zsh-history-substring-search; }
+    # ];
+
     shellAliases = {
       ls = "ls --color=auto -F";
       ll = "ls -alhF";
@@ -81,8 +93,7 @@
     };
 
     initContent = ''
-      # Enable Vi Keybindings (This is a fallback if keyMap = "vi" is not working as expected,
-      # but keyMap = "vi" is the preferred declarative way. If keyMap works, this line can be removed.)
+      # Fallback for Vi Keybindings if keyMap = "vi" option doesn't work as expected
       bindkey -v
 
       # --- PATH Exports ---
@@ -90,11 +101,10 @@
       export PATH="$HOME/.local/bin:$PATH"
       export PATH="$HOME/.npm-global/bin:$PATH"
 
-      # FZF Environment Variables are now primarily managed by programs.fzf module
-      # Keep KEYTIMEOUT here if it's mainly for ZLE/Vi mode responsiveness
+      # KEYTIMEOUT for ZLE responsiveness, especially in Vi mode
       export KEYTIMEOUT=150
 
-      # History search keybindings (these are standard Zsh and should work with fzf integration too)
+      # History search keybindings (standard Zsh, compatible with plugins)
       autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
       zle -N up-line-or-beginning-search
       zle -N down-line-or-beginning-search
@@ -133,9 +143,9 @@
         . "$venv_activate_path" && echo "Activated venv: $venv_name"
       }
 
-      # Example venv functions (uncomment and adapt paths as needed)
-      # v_mlmenv() { _activate_venv "mlmenv" "$HOME/.venv/mlmenv/bin/activate"; }
-      # v_crawl4ai() { _activate_venv "crawl4ai" "$HOME/.venv/crawl4ai/bin/activate"; }
+      # Example venv functions 
+      v_mlmenv() { _activate_venv "mlmenv" "$HOME/.venv/mlmenv/bin/activate"; }
+      v_crawl4ai() { _activate_venv "crawl4ai" "$HOME/.venv/crawl4ai/bin/activate"; }
     '';
   };
 
@@ -155,29 +165,19 @@
   };
 
   programs.fzf = {
-    enable = true; # This installs fzf and enables basic shell integration
-    enableZshIntegration = true; # Ensures Zsh specific keybindings (Ctrl-T, Ctrl-R, Alt-C) are set up
+    enable = true; # Installs fzf and enables basic shell integration
+    enableZshIntegration = true; # Sets up Zsh keybindings (Ctrl-T, Ctrl-R, Alt-C)
 
-    # Sets FZF_DEFAULT_COMMAND. `fd` needs to be in `home.packages`.
+    # Sets FZF_DEFAULT_COMMAND. `fd` (from home.packages) will be used.
     defaultCommand = "fd --type f --hidden --follow --exclude .git";
 
-    # Sets FZF_DEFAULT_OPTS. Options are a list of strings.
+    # Sets FZF_DEFAULT_OPTS.
     defaultOptions = [
       "--height 40%"
       "--layout=reverse"
       "--border"
-      # The prompt needs to be a single string argument if it contains spaces.
-      # If '➜  ' causes issues, try without the space or use simpler characters.
-      "--prompt='➜  '"
-      # Example of other options:
-      # "--color=dark"
-      # "--info=inline"
+      "--prompt='➜  '" # The prompt string for fzf
     ];
-    # The `programs.fzf` module automatically handles setting up Ctrl-T, Ctrl-R, and Alt-C.
-    # Ctrl-T will use `defaultCommand`.
-    # Alt-C typically uses `fd --type d` or `find . -type d` by default through the integration.
-    # If you need to override Alt-C specifically, you might still need FZF_ALT_C_COMMAND
-    # in home.sessionVariables if the module doesn't directly control it.
   };
 
   # --- GLOBAL ENVIRONMENT VARIABLES ---
@@ -189,8 +189,8 @@
     CXX = "clang++";
     GIT_TERMINAL_PROMPT = "1";
 
-    # This ensures Alt-C uses your preferred 'fd' command for directory searching with fzf.
-    # The fzf shell integration scripts will pick this up.
+    # Ensures fzf's Alt-C (change directory) binding uses `fd` for directory listing.
     FZF_ALT_C_COMMAND = "fd --type d --hidden --follow --exclude .git";
   };
 }
+
