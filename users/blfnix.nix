@@ -36,6 +36,10 @@
     dprint
     taplo
 
+    # === NEWLY ADDED AI TOOLS ===
+    aider-chat  # AI pair programmer
+    litellm     # LLM proxy and library
+
     # CLI Tools & Utilities
     tmux
     pass
@@ -222,3 +226,4 @@
     FZF_ALT_C_COMMAND = "fd --type d --hidden --follow --exclude .git";
   };
 }
+
