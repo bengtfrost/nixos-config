@@ -1,3 +1,4 @@
+
 # /etc/nixos/users/blfnix.nix
 { pkgs, config, lib, inputs, ... }:
 
@@ -51,7 +52,7 @@
     ffmpegthumbnailer
     poppler_utils
     w3m
-    zathura
+    zathura 
     zsh-autocomplete
   ];
 
@@ -151,7 +152,6 @@
 
   # --- PROGRAM CONFIGURATIONS ---
   programs.starship.enable = true;
-  programs.zathura.enable = true;
   programs.helix.enable = true;
 
   programs.git = {
@@ -180,6 +180,52 @@
     ];
   };
 
+  programs.zathura = {
+    enable = true;
+    # Add your zathurarc settings here
+    options = {
+      # These will be written to the generated zathurarc
+      selection-clipboard = "clipboard";
+      adjust-open = "best-fit";
+      # Add any other zathurarc settings you want
+      # For example:
+      # "font" = "Monospace 12";
+      # "default-bg" = "#282a36";
+      # "statusbar-fg" = "#f8f8f2";
+      # "statusbar-bg" = "#44475a";
+      default-bg =                 "#212121";
+      default-fg =                 "#303030";
+      statusbar-fg =               "#B2CCD6";
+      statusbar-bg =               "#353535";
+      inputbar-bg =                "#212121";
+      inputbar-fg =                "#FFFFFF";
+      notification-bg =            "#212121";
+      notification-fg =            "#FFFFFF";
+      notification-error-bg =      "#212121";
+      notification-error-fg =      "#F07178";
+      notification-warning-bg =    "#212121";
+      notification-warning-fg =    "#F07178";
+      highlight-color =            "#FFCB6B";
+      highlight-active-color =     "#82AAFF";
+      completion-bg =              "#303030";
+      completion-fg =              "#82AAFF";
+      completion-highlight-fg =    "#FFFFFF";
+      completion-highlight-bg =    "#82AAFF";
+      recolor-lightcolor =         "#212121";
+      recolor-darkcolor =          "#EEFFFF";
+      recolor =                    "false";
+      recolor-keephue =            "false";
+    };
+    # If you have many settings or prefer a separate file:
+    # extraConfig = ''
+    #   set selection-clipboard clipboard
+    #   set adjust-open best-fit
+    #   # More settings
+    # '';
+    # Or even source an entire file you manage within your flake:
+    # extraConfig = builtins.readFile ../dotfiles/zathurarc-custom; # Assuming path in your flake
+  };
+
   # --- GLOBAL ENVIRONMENT VARIABLES ---
   home.sessionVariables = {
     EDITOR = "hx";
@@ -193,4 +239,3 @@
     FZF_ALT_C_COMMAND = "fd --type d --hidden --follow --exclude .git";
   };
 }
-
