@@ -1,4 +1,3 @@
-```markdown
 # ❄️ Declarative NixOS with Flakes & Home Manager: A Zig Developer's Setup 🚀
 
 Welcome! This guide details how to set up a fully declarative, reproducible NixOS system using the power of Nix Flakes, manage your user environment with Home Manager, and compile a custom development version of the Zig programming language ⚡.
@@ -485,5 +484,3 @@ You've now configured a NixOS system that is fully managed by Flakes, with your 
 *   **Isolated Custom Builds:** `nix-shell` facilitates complex tasks like compiling Zig in a compatible environment.
 
 This foundation empowers you to further refine and manage your NixOS system with confidence. Happy Nixin'!
-
-```
