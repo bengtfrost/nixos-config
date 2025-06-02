@@ -7,71 +7,53 @@
   home.stateVersion = "25.05";
 
   # --- PACKAGES ---
-  # All your user-specific packages are managed here.
   home.packages = with pkgs; [
     # Dev Toolchains
-    rustup # For rustc, cargo, rust-analyzer, rustfmt (via rustup component add)
-    python313 # For Python development
-    uv        # For project-local Python venvs (use with Nix-provided Python)
-    nodejs_24 # Provides node, npm (for LSPs below if they are node-based)
-    zig       # System's stable Zig (e.g., 0.14)
-    zls       # Language server for system's stable Zig
-    zsh-autocomplete # For Zsh autocompletion
+    rustup
+    python313 # This makes python3.13 available in PATH for `uv venv`
+    uv
+    nodejs_24
+    zig
+    zls
+    zsh-autocomplete
 
-    # BUILD TOOLS for custom Zig dev build (and general use)
+    # BUILD TOOLS
     cmake
-    ninja # Ninja build system
+    ninja
+    llvmPackages_20.clang
+    llvmPackages_20.llvm
+    llvmPackages_20.lld
+    llvmPackages_20.clang-tools
 
-    # LLVM/Clang Toolchain (LLVM 20 - or your chosen version)
-    llvmPackages_20.clang       # Provides clang, clang++, and standard wrappers
-    llvmPackages_20.llvm        # Core LLVM tools and libraries (llvm-config, etc.)
-    llvmPackages_20.lld         # The LLVM linker, lld
-    # llvmPackages_20.bintools  # Intentionally not included to avoid objdump collision if clang handles it
-    llvmPackages_20.clang-tools # Provides clangd, clang-format
-
-    # Editors
+    # Editors & LSPs
     helix
-
-    # === LSPs and FORMATTERS for HELIX (from Nixpkgs) ===
-    marksman     # Markdown LSP
-
-    # Python LSPs & Formatters
-    ruff         # Provides 'ruff server' (LSP) and 'ruff format' / 'ruff check --fix'
-    python313Packages.python-lsp-server # Provides 'pylsp' command
-
-    # TypeScript/JavaScript/JSON/YAML - LSPs
-    nodePackages.typescript-language-server # Provides 'typescript-language-server'
-    nodePackages.vscode-json-languageserver # Provides 'json-language-server' (for JSON)
-    nodePackages.yaml-language-server       # Provides 'yaml-language-server'
-
-    # Formatters
-    dprint       # General purpose formatter, command 'dprint'
-    taplo        # TOML formatter and LSP provider, command 'taplo' (includes 'taplo lsp stdio')
-    # Note: clang-format is from llvmPackages_20.clang-tools
-    # Note: rustfmt is installed via `rustup component add rustfmt`
-    # Note: zig fmt is part of the `zig` executable
-
-    # === END LSPs and FORMATTERS ===
+    marksman
+    ruff
+    python313Packages.python-lsp-server
+    nodePackages.typescript-language-server
+    nodePackages.vscode-json-languageserver
+    nodePackages.yaml-language-server
+    dprint
+    taplo
 
     # CLI Tools & Utilities
     tmux
     pass
     keychain
-    git          # Standard git package
-    gh           # GitHub CLI
-    fd           # For fzf and general use
+    git
+    gh
+    fd
     ripgrep
     bat
     jq
-    # fzf is managed by programs.fzf module below
     xclip
     yazi
-    ueberzugpp   # For yazi image previews
-    unar         # For yazi archive previews
-    ffmpegthumbnailer # For yazi video thumbnails
-    poppler_utils     # For yazi PDF previews
-    w3m          # Text-based browser
-    zathura      # Document viewer
+    ueberzugpp
+    unar
+    ffmpegthumbnailer
+    poppler_utils
+    w3m
+    zathura
   ];
 
   # --- ZSH CONFIGURATION ---
@@ -87,8 +69,8 @@
       la = "ls -AF";
       l  = "ls -CF";
       glog = "git log --oneline --graph --decorate --all";
-      cc = "clang"; # Will use clang from llvmPackages_20
-      cxx = "clang++"; # Will use clang++ from llvmPackages_20
+      cc = "clang";
+      cxx = "clang++";
     };
 
     history = {
@@ -105,14 +87,11 @@
       bindkey -v
 
       # --- PATH Exports ---
-      # These ensure tools installed outside of Nix (but within user's home) are found.
-      # Nix-managed tools (from home.packages) are typically prepended to PATH by Home Manager.
-      export PATH="$HOME/.cargo/bin:$PATH"   # For rustup tools (rustc, cargo, rust-analyzer, rustfmt) & cargo install
-      export PATH="$HOME/.local/bin:$PATH" # For user scripts & custom builds (like your Zig dev)
-      export PATH="$HOME/.npm-global/bin:$PATH" # For any global npm packages not managed by Nix
+      export PATH="$HOME/.cargo/bin:$PATH"
+      export PATH="$HOME/.local/bin:$PATH"
+      export PATH="$HOME/.npm-global/bin:$PATH"
 
-      # KEYTIMEOUT for ZLE responsiveness, especially in Vi mode
-      export KEYTIMEOUT=150
+      export KEYTIMEOUT=150 # For Vi mode ESC responsiveness
 
       # History search keybindings - COMMENTED OUT to allow zsh-autocomplete to use arrow keys
       # autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
@@ -148,20 +127,29 @@
         if [[ ! -f "$venv_activate_path" ]]; then
           echo "Error: Activation script not found: $venv_activate_path" >&2; return 1
         fi
-        # Deactivate if another venv is active
-        [[ "$(type -t deactivate)" = "function" ]] && deactivate
+        # Deactivate if another venv is active.
+        # Uses Zsh-compatible check for whether 'deactivate' command (function) exists.
+        # Bash's `type -t deactivate` is not portable to Zsh.
+        if (( $+commands[deactivate] )); then
+          deactivate
+        fi
         . "$venv_activate_path" && echo "Activated venv: $venv_name"
       }
 
-      # Example venv functions (uncomment and adapt paths as needed)
-      v_mlmenv() { _activate_venv "mlmenv" "$HOME/.venv/python3.13/mlmenv/bin/activate"; }
-      v_crawl4ai() { _activate_venv "crawl4ai" "$HOME/.venv/python3.13/crawl4ai/bin/activate"; }
+      # Virtual environment activation functions
+      # Assuming venvs are created in ~/.venv/python3.13/<env_name>
+      v_mlmenv() {
+        _activate_venv "mlmenv (Python 3.13)" "$HOME/.venv/python3.13/mlmenv/bin/activate"
+      }
+      v_crawl4ai() {
+        _activate_venv "crawl4ai (Python 3.13)" "$HOME/.venv/python3.13/crawl4ai/bin/activate"
+      }
     '';
   };
 
   # --- PROGRAM CONFIGURATIONS ---
   programs.starship.enable = true;
-  programs.helix.enable = true; # Ensures Helix editor itself is from Nixpkgs
+  programs.helix.enable = true;
 
   programs.git = {
     enable = true;
@@ -174,8 +162,8 @@
   };
 
   programs.fzf = {
-    enable = true; # Installs fzf and enables basic shell integration
-    enableZshIntegration = true; # Sets up Zsh keybindings (Ctrl-T, Ctrl-R, Alt-C)
+    enable = true;
+    enableZshIntegration = true;
     defaultCommand = "fd --type f --hidden --follow --exclude .git";
     defaultOptions = [
       "--height 40%"
@@ -210,29 +198,18 @@
       completion-highlight-bg = "#82AAFF";
       recolor-lightcolor = "#212121";
       recolor-darkcolor = "#EEFFFF";
-      recolor = false; # Note: boolean, not string "false"
-      recolor-keephue = false; # Note: boolean
+      recolor = false;
+      recolor-keephue = false;
     };
   };
 
-  # --- MANAGING HELIX CONFIGURATION FILES (Recommended) ---
-  # Assumes you have created these files inside your flake, e.g., at
-  # /etc/nixos/dotfiles/helix/languages.toml
-  # /etc/nixos/dotfiles/helix/config.toml (if you manage it too)
-  # The path `../dotfiles/` is relative to this `blfnix.nix` file's location
-  # (e.g. if blfnix.nix is in /etc/nixos/users/ and dotfiles/ is in /etc/nixos/dotfiles/)
+  # --- MANAGING HELIX CONFIGURATION FILES ---
   xdg.configFile."helix/languages.toml" = {
-    source = ../dotfiles/helix/languages.toml;
-    # If you don't want to manage it via a separate file and prefer inline text:
-    # text = ''
-    #   # Paste your languages.toml content here
-    # '';
+    source = ../dotfiles/helix/languages.toml; # Assumes this file exists in your flake structure
   };
-  # Example for config.toml:
   # xdg.configFile."helix/config.toml" = {
-  #   source = ../dotfiles/helix/config.toml;
+  #   source = ../dotfiles/helix/config.toml; # If you manage config.toml this way too
   # };
-
 
   # --- GLOBAL ENVIRONMENT VARIABLES ---
   home.sessionVariables = {
