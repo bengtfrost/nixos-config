@@ -58,6 +58,7 @@
     poppler_utils
     w3m
     zathura
+    ghostty
   ];
 
   # --- ZSH CONFIGURATION ---
@@ -226,4 +227,3 @@
     FZF_ALT_C_COMMAND = "fd --type d --hidden --follow --exclude .git";
   };
 }
-
