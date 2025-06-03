@@ -58,7 +58,6 @@
     poppler_utils
     w3m
     zathura
-    ghostty
   ];
 
   # --- ZSH CONFIGURATION ---
@@ -205,6 +204,60 @@
       recolor-darkcolor = "#EEFFFF";
       recolor = false;
       recolor-keephue = false;
+    };
+  };
+
+  # --- ALACRITTY CONFIGURATION ---
+  programs.alacritty = {
+    enable = true;
+    settings = {
+      env.TERM = "alacritty";
+
+      window = {
+        # Set initial window dimensions (columns x lines)
+        dimensions = { columns = 83; lines = 25; }; # ADDED/MODIFIED
+
+        padding = { x = 5; y = 5; };
+        dynamic_title = true;
+        # decorations = "full"; # Keep as "full" for XFCE to draw decorations
+      };
+
+      scrolling.history = 10000;
+
+      font = {
+        normal = { family = "Cousine Nerd Font Mono"; style = "Regular"; };
+        bold = { family = "Cousine Nerd Font Mono"; style = "Bold"; };
+        italic = { family = "Cousine Nerd Font Mono"; style = "Italic"; };
+        bold_italic = { family = "Cousine Nerd Font Mono"; style = "Bold Italic"; };
+        size = 10.0; # Or the size that worked best for you
+      };
+
+      cursor = {
+        style = { shape = "Block"; blinking = "Off"; };
+      };
+
+      colors = {
+        primary = { background = "0x242424"; foreground = "0xdedede"; };
+        cursor = { text = "CellBackground"; cursor = "0xf0f0f0"; };
+        normal = {
+          black = "0x1e1e1e"; red = "0xc01c28"; green = "0x26a269"; yellow = "0xa2734c";
+          blue = "0x12488b"; magenta = "0xa347ba"; cyan = "0x258f8f"; white = "0xa0a0a0";
+        };
+        bright = {
+          black = "0x4d4d4d"; red = "0xf66151"; green = "0x33d17a"; yellow = "0xf8e45c";
+          blue = "0x3584e4"; magenta = "0xc061cb"; cyan = "0x33c7de"; white = "0xf0f0f0";
+        };
+      };
+
+      bell = {
+        animation = "EaseOutExpo";
+        duration = 100;
+      };
+
+      mouse.hide_when_typing = true;
+
+      # Shell
+      # shell = { program = "${pkgs.zsh}/bin/zsh", args = ["-l"] };
     };
   };
 
